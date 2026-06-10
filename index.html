@@ -44,6 +44,8 @@ tr.hot { background:#fffdf5; } tr.hot:hover { background:#fff8e6; }
 .tt { font-size:11px; font-weight:600; } .tt.transfer { color:#9a3412; } .tt.open { color:#166534; }
 .fit { display:inline-block; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:700; white-space:nowrap; }
 .fit.hi { background:#e6f7ec; color:#1f7a3d; } .fit.md { background:#eef0f3; color:#5b6577; } .fit.lo { background:#fdeaea; color:#b4232c; }
+.copybtn { margin-left:6px; border:1px solid #d4d8e0; background:#fff; border-radius:6px; font-size:11px; line-height:1; padding:2px 6px; cursor:pointer; color:#2f3aa3; vertical-align:middle; }
+.copybtn:hover { background:#eef1ff; } .copybtn.ok { color:#1f7a3d; border-color:#bfe6cc; background:#eaf7ee; }
 .star { color:#f5a623; font-size:15px; } .star.off { color:#dfe2ea; }
 .formc { font-size:11px; color:#6b7280; font-variant-numeric:tabular-nums; white-space:nowrap; }
 .formc.full { color:#1f7a3d; font-weight:700; }
@@ -136,7 +138,7 @@ function render(){
     <td>${r.source?esc(r.source):'<span class="muted">&mdash;</span>'}</td>
     <td><span class="fit ${r.atier==='High'?'hi':(r.atier==='Low'?'lo':'md')}" title="Admit-fit ${r.afit}\u00d7">${esc(r.atier)}</span></td>
     <td>${r.first?esc(r.first):'<span class="muted">&mdash;</span>'}</td>
-    <td>${r.last?esc(r.last):'<span class="muted">&mdash;</span>'}</td>
+    <td>${r.last?esc(r.last):'<span class="muted">&mdash;</span>'}${(r.first||r.last)?` <button class="copybtn" title="Copy full name" data-copy="${esc((r.first+' '+r.last).trim())}">Copy</button>`:''}</td>
     <td class="mono">${r.phone?esc(r.phone):'<span class="muted">&mdash;</span>'}</td>
     <td>${r.provider?esc(r.provider):'<span class="muted">&mdash;</span>'}</td>
     <td>${r.sub?esc(r.sub):'<span class="muted">&mdash;</span>'}</td>
@@ -150,6 +152,9 @@ fillSelect("program",Array.from(new Set(LEADS.map(r=>r.program))));
 fillSelect("campaign",Array.from(new Set(LEADS.map(r=>r.campaign))));
 ["window","afit","inssrc","program","ptype","campaign"].forEach(id=>{ const el=document.getElementById(id),k="cpts_"+id; const sv=localStorage.getItem(k); if(sv!==null) el.value=sv; el.addEventListener("change",e=>{localStorage.setItem(k,e.target.value);render();}); });
 document.getElementById("q").addEventListener("input",render);
+function _fallbackCopy(text,cb){ const ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.focus(); ta.select(); try{document.execCommand("copy");}catch(e){} document.body.removeChild(ta); if(cb)cb(); }
+function _copyName(text,btn){ const done=()=>{ btn.textContent="\u2713 Copied"; btn.classList.add("ok"); setTimeout(()=>{btn.textContent="Copy";btn.classList.remove("ok");},1000); }; if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done).catch(()=>_fallbackCopy(text,done)); } else { _fallbackCopy(text,done); } }
+document.getElementById("rows").addEventListener("click",e=>{ const b=e.target.closest(".copybtn"); if(b){ e.stopPropagation(); _copyName(b.getAttribute("data-copy"),b); } });
 document.getElementById("updated").innerHTML='<span class="dot"></span>Snapshot loaded '+BUILT.toLocaleString(undefined,{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})+'<br>Source: Clear Path Meta Leads (14).xlsx';
 document.getElementById("note").textContent=LEADS.length.toLocaleString()+" matched leads (Meta test leads excluded). Insurance source derived from “who provides your insurance”. Upload a newer workbook to refresh; the 24-hour window is measured from the moment you open this view.";
 render();
