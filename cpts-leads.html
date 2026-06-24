@@ -80,7 +80,6 @@ footer.note { margin-top:14px; font-size:12px; color:#8a90a0; }
       <select id="inssrc"><option value="">All sources</option><option value="Marketplace">Marketplace</option><option value="Employer-based">Employer-based</option><option value="Family / Spouse">Family / Spouse</option><option value="Private / PPO">Private / PPO</option><option value="Medicare / Medicaid">Medicare / Medicaid</option><option value="Other">Other</option><option value="Unknown / Not sure">Unknown / Not sure</option></select></div>
     <div class="ctl"><label for="program">Program</label><select id="program"><option value="">All programs</option></select></div>
     <div class="ctl"><label for="ptype">Program type</label><select id="ptype"><option value="">All types</option><option value="TRANSFER ONLY">Transfer only</option><option value="OPEN TO CLOSE">Open to close</option></select></div>
-    <div class="ctl"><label for="campaign">Campaign</label><select id="campaign"><option value="">All campaigns</option></select></div>
     <div class="ctl"><label for="q">Search</label><input type="search" id="q" placeholder="name, phone, carrier&hellip;"></div>
   </div>
   <div class="kpis" id="kpis"></div>
@@ -119,7 +118,7 @@ function render(){
   const winH=parseInt(document.getElementById("window").value,10);
   const afitf=document.getElementById("afit").value;
   const isrc=document.getElementById("inssrc").value, prog=document.getElementById("program").value;
-  const ptype=document.getElementById("ptype").value, camp=document.getElementById("campaign").value;
+  const ptype=document.getElementById("ptype").value;
   const q=document.getElementById("q").value.trim().toLowerCase();
   let rows=LEADS.slice().sort((a,b)=>b.ts-a.ts);
   if(winH>0){ const c=Date.now()-winH*3600*1000; rows=rows.filter(r=>r.ts>=c); }
@@ -128,7 +127,6 @@ function render(){
   if(isrc) rows=rows.filter(r=>r.isrc===isrc);
   if(prog) rows=rows.filter(r=>r.program===prog);
   if(ptype) rows=rows.filter(r=>r.ptype===ptype);
-  if(camp) rows=rows.filter(r=>r.campaign===camp);
   if(q) rows=rows.filter(r=>(r.first+" "+r.last+" "+r.phone+" "+r.carrier+" "+r.provider+" "+r.isrc+" "+r.campaign+" "+r.program+" "+r.ptype+" "+r.atier+" "+r.sub+" "+r.rdy+" "+r.who+" "+r.source).toLowerCase().includes(q));
   document.getElementById("kpis").innerHTML=
     kpi(rows.length,"Leads shown")+kpi(rows.filter(r=>r.atier==="High").length,"High admit-fit")+
@@ -136,8 +134,8 @@ function render(){
     kpi(rows.filter(r=>r.isrc==="Employer-based").length,"Employer-based")+
     kpi(new Set(rows.map(r=>r.program)).size,"Programs")+kpi(new Set(rows.map(r=>r.campaign)).size,"Campaigns")+
     kpi(rows.filter(r=>r.ptype==="TRANSFER ONLY").length,"Transfer only")+kpi(rows.filter(r=>r.ptype==="OPEN TO CLOSE").length,"Open to close");
-  const tb=document.getElementById("rows");
-  if(!rows.length){ tb.innerHTML='<tr><td colspan="12" class="empty">No matching leads in this window.</td></tr>'; return; }
+      const tb=document.getElementById("rows");
+  if(!rows.length){ tb.innerHTML='<tr><td colspan="13" class="empty">No matching leads in this window.</td></tr>'; return; }
   tb.innerHTML=rows.map(r=>`<tr>
     <td class="mono" style="white-space:nowrap">${esc(fmtDate(r.created))}</td>
     <td>${r.source?esc(r.source):'<span class="muted">&mdash;</span>'}</td>
@@ -155,8 +153,7 @@ function render(){
   </tr>`).join("");
 }
 fillSelect("program",Array.from(new Set(LEADS.map(r=>r.program))));
-fillSelect("campaign",Array.from(new Set(LEADS.map(r=>r.campaign))));
-["afit","inssrc","program","ptype","campaign"].forEach(id=>{ const el=document.getElementById(id),k="cpts_"+id; const sv=localStorage.getItem(k); if(sv!==null) el.value=sv; el.addEventListener("change",e=>{localStorage.setItem(k,e.target.value);render();}); });
+["afit","inssrc","program","ptype"].forEach(id=>{ const el=document.getElementById(id),k="cpts_"+id; const sv=localStorage.getItem(k); if(sv!==null) el.value=sv; el.addEventListener("change",e=>{localStorage.setItem(k,e.target.value);render();}); });
 document.getElementById("q").addEventListener("input",render);
 function _fallbackCopy(text,cb){ const ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.focus(); ta.select(); try{document.execCommand("copy");}catch(e){} document.body.removeChild(ta); if(cb)cb(); }
 function _copyName(text,btn){ const _o=btn.textContent; const done=()=>{ btn.textContent="\u2713 Copied"; btn.classList.add("ok"); setTimeout(()=>{btn.textContent=_o;btn.classList.remove("ok");},1000); }; if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done).catch(()=>_fallbackCopy(text,done)); } else { _fallbackCopy(text,done); } }
