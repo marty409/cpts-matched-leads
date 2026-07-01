@@ -159,7 +159,7 @@ document.getElementById("q").addEventListener("input",render);
 function _fallbackCopy(text,cb){ const ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.focus(); ta.select(); try{document.execCommand("copy");}catch(e){} document.body.removeChild(ta); if(cb)cb(); }
 function _copyName(text,btn){ const _o=btn.textContent; const done=()=>{ btn.textContent="\u2713 Copied"; btn.classList.add("ok"); setTimeout(()=>{btn.textContent=_o;btn.classList.remove("ok");},1000); }; if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done).catch(()=>_fallbackCopy(text,done)); } else { _fallbackCopy(text,done); } }
 document.getElementById("rows").addEventListener("click",e=>{ const b=e.target.closest(".copybtn"); if(b){ e.stopPropagation(); _copyName(b.getAttribute("data-copy"),b); } });
-document.getElementById("updated").innerHTML='<span class="dot"></span>Snapshot loaded '+BUILT.toLocaleString(undefined,{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})+'<br>Source: Clear Path Meta Leads (16)-d69bc881.xlsx';
+document.getElementById("updated").innerHTML='<span class="dot"></span>Snapshot loaded '+BUILT.toLocaleString(undefined,{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})+'<br>Source: Clear Path Meta Leads (17)-450cea21.xlsx';
 document.getElementById("note").textContent=LEADS.length.toLocaleString()+" matched leads (Meta test leads excluded). Insurance source derived from “who provides your insurance”. Upload a newer workbook to refresh; the time window is measured from the moment you open this view.";
 render();
 </script>
